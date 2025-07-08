@@ -1,51 +1,39 @@
 package repository
 
 import (
-	"GO_LANG_PROJECT_SETUP/config"
-	model "GO_LANG_PROJECT_SETUP/models"
+    "GO_LANG_PROJECT_SETUP/config"
+    "GO_LANG_PROJECT_SETUP/models"
 )
 
 func GetAllUsers() ([]model.User, error) {
-	rows, err := config.DB.Query("SELECT id, name, email FROM users")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var users []model.User
-	for rows.Next() {
-		var u model.User
-		err := rows.Scan(&u.ID, &u.Name, &u.Email)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, u)
-	}
-
-	return users, nil
+    var users []model.User
+    err := config.DB.Find(&users).Error
+    return users, err
 }
 
-func GetUserByID(id int) (model.User, error) {
-	var u model.User
-	err := config.DB.QueryRow("SELECT id, name, email FROM users WHERE id = ?", id).
-		Scan(&u.ID, &u.Name, &u.Email)
-	return u, err
+func GetUserByID(id uint) (model.User, error) {
+    var user model.User
+    err := config.DB.First(&user, id).Error
+    return user, err
 }
 
-func CreateUser(u model.User) (int64, error) {
-	res, err := config.DB.Exec("INSERT INTO users (name, email) VALUES (?, ?)", u.Name, u.Email)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
+func CreateUser(user model.User) (model.User, error) {
+    err := config.DB.Create(&user).Error
+    return user, err
 }
 
-func UpdateUser(id int, u model.User) error {
-	_, err := config.DB.Exec("UPDATE users SET name = ?, email = ? WHERE id = ?", u.Name, u.Email, id)
-	return err
+func UpdateUser(id uint, updated model.User) (model.User, error) {
+    var user model.User
+    err := config.DB.First(&user, id).Error
+    if err != nil {
+        return user, err
+    }
+    user.Name = updated.Name
+    user.Email = updated.Email
+    config.DB.Save(&user)
+    return user, nil
 }
 
-func DeleteUser(id int) error {
-	_, err := config.DB.Exec("DELETE FROM users WHERE id = ?", id)
-	return err
+func DeleteUser(id uint) error {
+    return config.DB.Delete(&model.User{}, id).Error
 }
