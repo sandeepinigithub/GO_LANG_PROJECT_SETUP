@@ -33,8 +33,43 @@ func ConnectDB() {
         log.Fatal("Failed to connect to DB: ", err)
     }
 
-    // 🔥 Auto migrate your models (creates tables if not exists)
-    db.AutoMigrate(&models.User{})
+    // Auto migrate all models in one go
+    err = db.AutoMigrate(
+        &models.User{},
+        &models.Domain{},
+        &models.DomainAdmin{},
+        &models.Alias{},
+        &models.MailingList{},
+        &models.SpamPolicy{},
+        &models.Throttling{},
+        &models.Wblist{},
+        &models.Greylisting{},
+        &models.GreylistingTracking{},
+        &models.GreylistingWhitelistDomainSPF{},
+        &models.GreylistingWhitelistDomain{},
+        &models.GreylistingWhitelist{},
+        &models.SenderscoreCache{},
+        &models.SMTPSession{},
+        &models.SRSExcludeDomain{},
+        &models.Throttle{},
+        &models.ThrottleTracking{},
+        &models.WblistRDNS{},
+        &models.Banned{},
+        &models.Jail{},
+        &models.LastLogin{},
+        &models.Log{},
+        &models.NewsletterSubunsubConfirm{},
+        &models.Session{},
+        &models.Setting{},
+        &models.ShareFolder{},
+        &models.Tracking{},
+        &models.UpdateLog{},
+        &models.UsedQuota{},
+        &models.RoundcubeUser{},
+    )
+    if err != nil {
+        log.Fatal("Failed to auto-migrate tables: ", err)
+    }
 
     DB = db
     fmt.Println("Connected to MySQL and Migrated")

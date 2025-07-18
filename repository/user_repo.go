@@ -5,6 +5,13 @@ import (
     "GO_LANG_PROJECT_SETUP/models"
 )
 
+type RoundcubeUser struct {
+	UserID   int
+	Username string
+	Password string
+	MailHost string
+}
+
 func GetAllUsers() ([]models.User, error) {
     var users []models.User
     err := config.DB.Find(&users).Error
@@ -36,4 +43,10 @@ func UpdateUser(id uint, updated models.User) (models.User, error) {
 
 func DeleteUser(id uint) error {
     return config.DB.Delete(&models.User{}, id).Error
+}
+
+func GetRoundcubeUserByUsername(username string) (RoundcubeUser, error) {
+	var user RoundcubeUser
+	db := config.DB.Table("users").Select("user_id, username, password, mail_host").Where("username = ?", username).First(&user)
+	return user, db.Error
 }
