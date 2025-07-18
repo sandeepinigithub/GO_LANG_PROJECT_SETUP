@@ -34,7 +34,7 @@ func ConnectDB() {
     }
 
     // 🔥 Auto migrate your models (creates tables if not exists)
-    db.AutoMigrate(&model.User{})
+    db.AutoMigrate(&models.User{})
 
     DB = db
     fmt.Println("Connected to MySQL and Migrated")

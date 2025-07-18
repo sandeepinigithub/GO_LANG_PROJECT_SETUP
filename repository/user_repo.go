@@ -5,25 +5,25 @@ import (
     "GO_LANG_PROJECT_SETUP/models"
 )
 
-func GetAllUsers() ([]model.User, error) {
-    var users []model.User
+func GetAllUsers() ([]models.User, error) {
+    var users []models.User
     err := config.DB.Find(&users).Error
     return users, err
 }
 
-func GetUserByID(id uint) (model.User, error) {
-    var user model.User
+func GetUserByID(id uint) (models.User, error) {
+    var user models.User
     err := config.DB.First(&user, id).Error
     return user, err
 }
 
-func CreateUser(user model.User) (model.User, error) {
+func CreateUser(user models.User) (models.User, error) {
     err := config.DB.Create(&user).Error
     return user, err
 }
 
-func UpdateUser(id uint, updated model.User) (model.User, error) {
-    var user model.User
+func UpdateUser(id uint, updated models.User) (models.User, error) {
+    var user models.User
     err := config.DB.First(&user, id).Error
     if err != nil {
         return user, err
@@ -35,5 +35,5 @@ func UpdateUser(id uint, updated model.User) (model.User, error) {
 }
 
 func DeleteUser(id uint) error {
-    return config.DB.Delete(&model.User{}, id).Error
+    return config.DB.Delete(&models.User{}, id).Error
 }
