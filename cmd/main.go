@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"GO_LANG_PROJECT_SETUP/config"
-	"GO_LANG_PROJECT_SETUP/logger"
-	"GO_LANG_PROJECT_SETUP/middleware"
-	"GO_LANG_PROJECT_SETUP/routes"
+	"devsMailGo/config"
+	"devsMailGo/logger"
+	"devsMailGo/middleware"
+	"devsMailGo/routes"
 )
 
 func main() {

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"GO_LANG_PROJECT_SETUP/api/dto"
-	"GO_LANG_PROJECT_SETUP/repository"
+	"devsMailGo/api/dto"
+	"devsMailGo/repository"
 )
 
 type JailsService struct{}

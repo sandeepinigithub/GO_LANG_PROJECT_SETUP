@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
-	"GO_LANG_PROJECT_SETUP/utils"
+	"devsMailGo/utils"
 )
 
 // RateLimiter represents a rate limiter

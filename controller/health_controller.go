@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-	"GO_LANG_PROJECT_SETUP/utils"
+	"devsMailGo/utils"
 )
 
 // HealthCheck provides system health status

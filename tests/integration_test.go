@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"GO_LANG_PROJECT_SETUP/routes"
-	"GO_LANG_PROJECT_SETUP/utils"
+	"devsMailGo/routes"
+	"devsMailGo/utils"
 	"github.com/gorilla/mux"
 )
 

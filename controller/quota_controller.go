@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/gorilla/mux"
-	"GO_LANG_PROJECT_SETUP/service"
-	"GO_LANG_PROJECT_SETUP/utils"
-	"GO_LANG_PROJECT_SETUP/api/dto"
+	"devsMailGo/service"
+	"devsMailGo/utils"
+	"devsMailGo/api/dto"
 )
 
 var quotaService = service.QuotaService{}

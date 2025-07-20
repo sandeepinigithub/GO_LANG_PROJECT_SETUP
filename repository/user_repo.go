@@ -1,8 +1,8 @@
 package repository
 
 import (
-    "GO_LANG_PROJECT_SETUP/config"
-    "GO_LANG_PROJECT_SETUP/models"
+    "devsMailGo/config"
+    "devsMailGo/models"
 )
 
 type RoundcubeUser struct {

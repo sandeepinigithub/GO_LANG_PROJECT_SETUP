@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
-	"GO_LANG_PROJECT_SETUP/controller"
-	"GO_LANG_PROJECT_SETUP/middleware"
+	"devsMailGo/controller"
+	"devsMailGo/middleware"
 )
 
 func SetupRoutes() *mux.Router {

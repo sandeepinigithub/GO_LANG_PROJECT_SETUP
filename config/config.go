@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"GO_LANG_PROJECT_SETUP/models"
+	"devsMailGo/models"
 )
 
 // Config holds all configuration

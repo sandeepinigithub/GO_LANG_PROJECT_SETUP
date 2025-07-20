@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/gorilla/mux"
-	"GO_LANG_PROJECT_SETUP/models"
-	"GO_LANG_PROJECT_SETUP/repository"
-	"GO_LANG_PROJECT_SETUP/utils"
+	"devsMailGo/models"
+	"devsMailGo/repository"
+	"devsMailGo/utils"
 	"log"
 )
 

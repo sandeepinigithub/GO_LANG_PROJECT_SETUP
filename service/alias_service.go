@@ -1,10 +1,10 @@
 package service
 
 import (
-	"GO_LANG_PROJECT_SETUP/models"
-	"GO_LANG_PROJECT_SETUP/repository"
+	"devsMailGo/models"
+	"devsMailGo/repository"
 	"errors"
-	"GO_LANG_PROJECT_SETUP/api/dto"
+	"devsMailGo/api/dto"
 )
 
 type AliasService struct{}

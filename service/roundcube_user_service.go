@@ -1,9 +1,9 @@
 package service
 
 import (
-	"GO_LANG_PROJECT_SETUP/models"
-	"GO_LANG_PROJECT_SETUP/repository"
-	"GO_LANG_PROJECT_SETUP/api/dto"
+	"devsMailGo/models"
+	"devsMailGo/repository"
+	"devsMailGo/api/dto"
 )
 
 type RoundcubeUserService struct{}

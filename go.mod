@@ -1,4 +1,4 @@
-module GO_LANG_PROJECT_SETUP
+module devsMailGo
 
 go 1.23.0
 

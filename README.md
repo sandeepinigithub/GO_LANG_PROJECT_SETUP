@@ -21,7 +21,7 @@ Enterprise-standard REST API for devsMailGo email server management, built with 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd GO_LANG_PROJECT_SETUP
+   cd devsMailGo
    ```
 
 2. **Install dependencies**
@@ -43,7 +43,7 @@ Enterprise-standard REST API for devsMailGo email server management, built with 
 ## 🏗️ Project Structure
 
 ```
-GO_LANG_PROJECT_SETUP/
+devsMailGo/
 ├── api/dto/           # Data Transfer Objects
 ├── cmd/              # Application entry point
 ├── config/           # Configuration management

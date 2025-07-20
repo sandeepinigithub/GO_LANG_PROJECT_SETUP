@@ -5,7 +5,7 @@ import (
 	"strings"
 	"context"
 	"time"
-	"GO_LANG_PROJECT_SETUP/utils"
+	"devsMailGo/utils"
 	"github.com/gorilla/mux"
 )
 

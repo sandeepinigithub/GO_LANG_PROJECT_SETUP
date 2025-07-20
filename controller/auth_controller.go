@@ -3,8 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"GO_LANG_PROJECT_SETUP/service"
-	"GO_LANG_PROJECT_SETUP/utils"
+	"devsMailGo/service"
+	"devsMailGo/utils"
 )
 
 var authUserService = service.UserService{}

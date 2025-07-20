@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"GO_LANG_PROJECT_SETUP/api/dto"
-	"GO_LANG_PROJECT_SETUP/service"
+	"devsMailGo/api/dto"
+	"devsMailGo/service"
 	"github.com/gorilla/mux"
 )
 
