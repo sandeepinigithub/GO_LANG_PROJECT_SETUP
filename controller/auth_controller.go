@@ -9,34 +9,65 @@ import (
 
 var authUserService = service.UserService{}
 
-// DTO for login request
+// LoginRequest represents the login request structure
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// DTO for login response
+// LoginResponse represents the login response structure
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token     string                 `json:"token"`
+	User      map[string]interface{} `json:"user"`
+	ExpiresAt string                 `json:"expires_at"`
 }
 
 // Login authenticates a user and returns a JWT token
 func Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.RespondError(w, "Invalid request payload")
+		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+
+	// Validate required fields
+	if req.Username == "" || req.Password == "" {
+		utils.RespondWithError(w, http.StatusBadRequest, "Username and password are required")
+		return
+	}
+
+	// Authenticate user
 	user, err := authUserService.AuthenticateUser(req.Username, req.Password)
 	if err != nil {
-		utils.RespondError(w, err.Error())
+		utils.RespondWithError(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
-	token, err := utils.GenerateJWT(user.Email)
+
+	// Use default domain if user domain is empty
+	domain := user.Domain
+	if domain == "" {
+		domain = "example.com" // Default domain
+	}
+
+	// Generate JWT token with user information
+	token, err := utils.GenerateJWTWithClaims(user.Email, "admin", domain)
 	if err != nil {
-		utils.RespondError(w, "Failed to generate token")
+		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to generate token")
 		return
 	}
-	resp := LoginResponse{Token: token}
+
+	// Prepare response
+	resp := LoginResponse{
+		Token: token,
+		User: map[string]interface{}{
+			"id":     user.ID,
+			"email":  user.Email,
+			"name":   user.Name,
+			"domain": user.Domain,
+			"role":   "admin",
+		},
+		ExpiresAt: "24h",
+	}
+
 	utils.RespondSuccess(w, resp)
 } 

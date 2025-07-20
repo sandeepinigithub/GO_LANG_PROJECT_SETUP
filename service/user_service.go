@@ -17,7 +17,12 @@ func (s *UserService) ListUsers() ([]dto.UserResponse, error) {
 	}
 	var resp []dto.UserResponse
 	for _, u := range users {
-		resp = append(resp, dto.UserResponse{ID: u.ID, Email: u.Email, Name: u.Name})
+		resp = append(resp, dto.UserResponse{
+			ID:     u.ID, 
+			Email:  u.Email, 
+			Name:   u.Name,
+			Domain: u.Domain,
+		})
 	}
 	return resp, nil
 }
@@ -27,7 +32,12 @@ func (s *UserService) GetUserByID(id uint) (*dto.UserResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := &dto.UserResponse{ID: user.ID, Email: user.Email, Name: user.Name}
+	resp := &dto.UserResponse{
+		ID:     user.ID, 
+		Email:  user.Email, 
+		Name:   user.Name,
+		Domain: user.Domain,
+	}
 	return resp, nil
 }
 
@@ -51,7 +61,12 @@ func (s *UserService) RegisterUserDTO(req dto.UserRequest) (*dto.UserResponse, e
 	if err != nil {
 		return nil, err
 	}
-	return &dto.UserResponse{ID: user.ID, Email: user.Email, Name: user.Name}, nil
+	return &dto.UserResponse{
+		ID:     user.ID, 
+		Email:  user.Email, 
+		Name:   user.Name,
+		Domain: user.Domain,
+	}, nil
 }
 
 func (s *UserService) UpdateUserDTO(id uint, req dto.UserRequest) (*dto.UserResponse, error) {
@@ -82,7 +97,12 @@ func (s *UserService) UpdateUserDTO(id uint, req dto.UserRequest) (*dto.UserResp
 	if err != nil {
 		return nil, err
 	}
-	return &dto.UserResponse{ID: user.ID, Email: user.Email, Name: user.Name}, nil
+	return &dto.UserResponse{
+		ID:     user.ID, 
+		Email:  user.Email, 
+		Name:   user.Name,
+		Domain: user.Domain,
+	}, nil
 }
 
 func (s *UserService) DeleteUser(id uint) error {
@@ -100,8 +120,9 @@ func (s *UserService) AuthenticateUser(email, password string) (*dto.UserRespons
 	}
 	
 	return &dto.UserResponse{
-		ID:    user.ID,
-		Email: user.Email,
-		Name:  user.Name,
+		ID:     user.ID,
+		Email:  user.Email,
+		Name:   user.Name,
+		Domain: user.Domain,
 	}, nil
 } 

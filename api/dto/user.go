@@ -10,7 +10,8 @@ type UserRequest struct {
 }
 
 type UserResponse struct {
-	ID    uint   `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
+	ID     uint   `json:"id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Domain string `json:"domain"`
 } 
