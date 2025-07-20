@@ -4,15 +4,30 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-
-	models "GO_LANG_PROJECT_SETUP/models"
-	"GO_LANG_PROJECT_SETUP/repository"
+	"GO_LANG_PROJECT_SETUP/api/dto"
 	"GO_LANG_PROJECT_SETUP/service"
-
 	"github.com/gorilla/mux"
 )
 
 var userService = service.UserService{}
+
+// DTOs for user API
+// (Add more fields as needed for your API)
+type UserRequest struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Domain   string `json:"domain"`
+	Quota    int    `json:"quota"`
+	Language string `json:"language"`
+}
+
+type UserResponse struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+	// Add more fields as needed
+}
 
 // Helper for standard response
 func respondJSON(w http.ResponseWriter, status int, success bool, data interface{}, message string) {
@@ -25,9 +40,9 @@ func respondJSON(w http.ResponseWriter, status int, success bool, data interface
 	})
 }
 
-// Get all users
+// List all users
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := repository.GetAllUsers()
+	users, err := userService.ListUsers()
 	if err != nil {
 		respondJSON(w, http.StatusInternalServerError, false, nil, "Failed to fetch users")
 		return
@@ -43,7 +58,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		respondJSON(w, http.StatusBadRequest, false, nil, "Invalid user ID")
 		return
 	}
-	user, err := repository.GetUserByID(uint(id))
+	user, err := userService.GetUserByID(uint(id))
 	if err != nil {
 		respondJSON(w, http.StatusNotFound, false, nil, "User not found")
 		return
@@ -53,17 +68,17 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 // Create new user
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var req dto.UserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondJSON(w, http.StatusBadRequest, false, nil, "Invalid request payload")
 		return
 	}
-	createdUser, err := repository.CreateUser(user)
+	user, err := userService.RegisterUserDTO(req)
 	if err != nil {
-		respondJSON(w, http.StatusInternalServerError, false, nil, "Failed to create user")
+		respondJSON(w, http.StatusInternalServerError, false, nil, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusCreated, true, createdUser, "User created successfully")
+	respondJSON(w, http.StatusCreated, true, user, "User created successfully")
 }
 
 // Update user by ID
@@ -74,17 +89,17 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		respondJSON(w, http.StatusBadRequest, false, nil, "Invalid user ID")
 		return
 	}
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var req dto.UserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondJSON(w, http.StatusBadRequest, false, nil, "Invalid request payload")
 		return
 	}
-	updatedUser, err := repository.UpdateUser(uint(id), user)
+	user, err := userService.UpdateUserDTO(uint(id), req)
 	if err != nil {
-		respondJSON(w, http.StatusInternalServerError, false, nil, "Failed to update user")
+		respondJSON(w, http.StatusInternalServerError, false, nil, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusOK, true, updatedUser, "User updated successfully")
+	respondJSON(w, http.StatusOK, true, user, "User updated successfully")
 }
 
 // Delete user by ID
@@ -95,7 +110,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		respondJSON(w, http.StatusBadRequest, false, nil, "Invalid user ID")
 		return
 	}
-	if err := repository.DeleteUser(uint(id)); err != nil {
+	if err := userService.DeleteUser(uint(id)); err != nil {
 		respondJSON(w, http.StatusInternalServerError, false, nil, "Failed to delete user")
 		return
 	}

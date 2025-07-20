@@ -2,12 +2,18 @@ package controller
 
 import (
 	"net/http"
-	"GO_LANG_PROJECT_SETUP/repository"
+	"GO_LANG_PROJECT_SETUP/service"
 	"GO_LANG_PROJECT_SETUP/utils"
 )
 
+var jailsService = service.JailsService{}
+
+type JailResponse struct {
+	// Add fields as needed
+}
+
 func GetJails(w http.ResponseWriter, r *http.Request) {
-	jails, err := repository.GetAllJails()
+	jails, err := jailsService.ListJails()
 	if err != nil {
 		utils.RespondError(w, "Failed to fetch jails")
 		return

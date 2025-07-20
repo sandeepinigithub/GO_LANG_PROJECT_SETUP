@@ -2,14 +2,19 @@ package controller
 
 import (
 	"net/http"
-	// "encoding/json"
 	"strconv"
-	"GO_LANG_PROJECT_SETUP/repository"
+	"GO_LANG_PROJECT_SETUP/service"
 	"GO_LANG_PROJECT_SETUP/utils"
 )
 
+var bannedService = service.BannedService{}
+
+type BannedResponse struct {
+	IP string `json:"ip"`
+}
+
 func GetBanned(w http.ResponseWriter, r *http.Request) {
-	banned, err := repository.GetAllBanned()
+	banned, err := bannedService.ListBanned()
 	if err != nil {
 		utils.RespondError(w, "Failed to fetch banned IPs")
 		return
@@ -24,8 +29,7 @@ func Unban(w http.ResponseWriter, r *http.Request) {
 		utils.RespondError(w, "Invalid ID")
 		return
 	}
-	err = repository.UnbanByID(id)
-	if err != nil {
+	if err := bannedService.UnbanByID(id); err != nil {
 		utils.RespondError(w, "Failed to unban IP")
 		return
 	}

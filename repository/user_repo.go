@@ -50,3 +50,9 @@ func GetRoundcubeUserByUsername(username string) (RoundcubeUser, error) {
 	db := config.DB.Table("users").Select("user_id, username, password, mail_host").Where("username = ?", username).First(&user)
 	return user, db.Error
 }
+
+func GetUserByEmail(email string) (models.User, error) {
+	var user models.User
+	err := config.DB.Where("email = ?", email).First(&user).Error
+	return user, err
+}
