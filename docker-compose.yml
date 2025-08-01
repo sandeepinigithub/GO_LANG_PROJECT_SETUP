@@ -1,51 +1,9 @@
 version: '3.8'
 
 services:
-  # MySQL Database
-  mysql:
-    image: mysql:8.0
-    container_name: devsmailgo-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: devsmailgo
-      MYSQL_USER: devsmailgo
-      MYSQL_PASSWORD: devsmailgo_password
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - devsmailgo-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-
-  # Redis Cache (optional)
-  redis:
-    image: redis:7-alpine
-    container_name: devsmailgo-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - devsmailgo-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 20s
-      retries: 10
-
-  # API Application
+  # Go API Service
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: devsmailgo-api
-    restart: unless-stopped
+    build: .
     ports:
       - "8080:8080"
     environment:
@@ -54,29 +12,131 @@ services:
       - DB_USER=devsmailgo
       - DB_PASSWORD=devsmailgo_password
       - DB_NAME=devsmailgo
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - ENVIRONMENT=development
-      - LOG_LEVEL=debug
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - LDAP_HOST=openldap
+      - LDAP_PORT=389
+      - LDAP_BASE_DN=dc=example,dc=com
+      - LDAP_BIND_DN=cn=admin,dc=example,dc=com
+      - LDAP_BIND_PASSWORD=admin_password
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - mysql
+      - openldap
+    volumes:
+      - ./logs:/app/logs
     networks:
-      - devsmailgo-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
-      timeout: 20s
-      retries: 10
-      start_period: 30s
+      - mail_network
 
-  # Nginx Reverse Proxy (optional)
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: devsmailgo
+      MYSQL_USER: devsmailgo
+      MYSQL_PASSWORD: devsmailgo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - mail_network
+
+  # OpenLDAP Server
+  openldap:
+    image: osixia/openldap:1.5.0
+    environment:
+      LDAP_ORGANISATION: "Example Inc"
+      LDAP_DOMAIN: "example.com"
+      LDAP_ADMIN_PASSWORD: "admin_password"
+      LDAP_CONFIG_PASSWORD: "config_password"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+      - ./ldap/init:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    networks:
+      - mail_network
+
+  # phpLDAPadmin (LDAP Web Interface)
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "8081:80"
+    depends_on:
+      - openldap
+    networks:
+      - mail_network
+
+  # Postfix Mail Server
+  postfix:
+    image: catatnight/postfix
+    hostname: mail.example.com
+    environment:
+      maildomain: example.com
+      smtp_user: devsmailgo:devsmailgo_password
+    ports:
+      - "25:25"
+      - "587:587"
+    volumes:
+      - postfix_data:/var/mail
+      - ./postfix/config:/etc/postfix
+    networks:
+      - mail_network
+
+  # Dovecot IMAP Server
+  dovecot:
+    image: dovemark/dovecot:latest
+    ports:
+      - "143:143"
+      - "993:993"
+    volumes:
+      - dovecot_data:/var/mail
+      - ./dovecot/config:/etc/dovecot
+    depends_on:
+      - postfix
+    networks:
+      - mail_network
+
+  # Roundcube Webmail
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    environment:
+      ROUNDCUBEMAIL_DB_TYPE: mysql
+      ROUNDCUBEMAIL_DB_HOST: mysql
+      ROUNDCUBEMAIL_DB_NAME: roundcube
+      ROUNDCUBEMAIL_DB_USER: roundcube
+      ROUNDCUBEMAIL_DB_PASSWORD: roundcube_password
+      ROUNDCUBEMAIL_SMTP_SERVER: postfix
+      ROUNDCUBEMAIL_IMAP_SERVER: dovecot
+    ports:
+      - "8082:80"
+    depends_on:
+      - mysql
+      - postfix
+      - dovecot
+    volumes:
+      - roundcube_data:/var/www/html/config
+    networks:
+      - mail_network
+
+  # Redis (for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mail_network
+
+  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: devsmailgo-nginx
-    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -85,15 +145,19 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
       - api
+      - roundcube
     networks:
-      - devsmailgo-network
+      - mail_network
 
 volumes:
   mysql_data:
-    driver: local
+  ldap_data:
+  ldap_config:
+  postfix_data:
+  dovecot_data:
+  roundcube_data:
   redis_data:
-    driver: local
 
 networks:
-  devsmailgo-network:
+  mail_network:
     driver: bridge 

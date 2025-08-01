@@ -23,6 +23,7 @@ type Config struct {
 	Security SecurityConfig
 	Logging  LoggingConfig
 	Redis    RedisConfig
+	LDAP     LDAPConfig
 }
 
 // DatabaseConfig holds database configuration
@@ -71,6 +72,19 @@ type RedisConfig struct {
 	DB       int
 }
 
+// LDAPConfig holds LDAP configuration
+type LDAPConfig struct {
+	Host         string
+	Port         string
+	BaseDN       string
+	BindDN       string
+	BindPassword string
+	UserFilter   string
+	GroupFilter  string
+	UseSSL       bool
+	UseTLS       bool
+}
+
 var (
 	DB     *gorm.DB
 	AppConfig *Config
@@ -116,6 +130,17 @@ func LoadConfig() error {
 			Port:     getEnv("REDIS_PORT", "6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       getEnvAsInt("REDIS_DB", 0),
+		},
+		LDAP: LDAPConfig{
+			Host:         getEnv("LDAP_HOST", "localhost"),
+			Port:         getEnv("LDAP_PORT", "389"),
+			BaseDN:       getEnv("LDAP_BASE_DN", "dc=example,dc=com"),
+			BindDN:       getEnv("LDAP_BIND_DN", "cn=admin,dc=example,dc=com"),
+			BindPassword: getEnv("LDAP_BIND_PASSWORD", ""),
+			UserFilter:   getEnv("LDAP_USER_FILTER", "(uid=%s)"),
+			GroupFilter:  getEnv("LDAP_GROUP_FILTER", "(memberUid=%s)"),
+			UseSSL:       getEnvAsBool("LDAP_USE_SSL", false),
+			UseTLS:       getEnvAsBool("LDAP_USE_TLS", false),
 		},
 	}
 
@@ -243,6 +268,15 @@ func getEnvAsInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
+		}
+	}
+	return defaultValue
+}
+
+func getEnvAsBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
 		}
 	}
 	return defaultValue

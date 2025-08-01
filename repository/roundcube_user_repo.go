@@ -27,4 +27,10 @@ func UpdateRoundcubeUser(userID uint64, updated *models.RoundcubeUser) error {
 
 func DeleteRoundcubeUser(userID uint64) error {
 	return config.DB.Table("users").Where("user_id = ?", userID).Delete(&models.RoundcubeUser{}).Error
+}
+
+func GetRoundcubeUserByEmail(email string) (models.RoundcubeUser, error) {
+	var user models.RoundcubeUser
+	err := config.DB.Table("users").Where("username = ?", email).First(&user).Error
+	return user, err
 } 

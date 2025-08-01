@@ -82,5 +82,14 @@ func SetupRoutes() *mux.Router {
 	protectedAPI.HandleFunc("/roundcube-users", controller.ListRoundcubeUsers).Methods("GET")
 	protectedAPI.HandleFunc("/roundcube-user/{id}", controller.GetRoundcubeUser).Methods("GET")
 
+	// Mail management routes
+	protectedAPI.HandleFunc("/mailbox", controller.CreateMailbox).Methods("POST")
+	protectedAPI.HandleFunc("/mailbox/{email}", controller.DeleteMailbox).Methods("DELETE")
+	protectedAPI.HandleFunc("/mailbox/{email}", controller.GetMailboxInfo).Methods("GET")
+	protectedAPI.HandleFunc("/mailbox/{email}/quota", controller.UpdateMailboxQuota).Methods("PUT")
+	protectedAPI.HandleFunc("/mail/reload", controller.ReloadMailServices).Methods("POST")
+	protectedAPI.HandleFunc("/mail/check", controller.CheckMailDelivery).Methods("GET")
+	protectedAPI.HandleFunc("/mail/queue", controller.GetMailQueue).Methods("GET")
+
 	return r
 }
