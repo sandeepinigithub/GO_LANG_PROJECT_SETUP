@@ -23,7 +23,7 @@ type LDAPUser struct {
 // AuthenticateUser authenticates a user against LDAP
 func (s *LDAPService) AuthenticateUser(username, password string) (*LDAPUser, error) {
 	// Connect to LDAP server
-	conn, err := s.connectToLDAP()
+	conn, err := s.ConnectToLDAP()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to LDAP: %w", err)
 	}
@@ -60,7 +60,7 @@ func (s *LDAPService) AuthenticateUser(username, password string) (*LDAPUser, er
 
 // SearchUser searches for a user in LDAP
 func (s *LDAPService) SearchUser(username string) (*LDAPUser, error) {
-	conn, err := s.connectToLDAP()
+	conn, err := s.ConnectToLDAP()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to LDAP: %w", err)
 	}
@@ -71,7 +71,7 @@ func (s *LDAPService) SearchUser(username string) (*LDAPUser, error) {
 
 // GetUserGroups retrieves groups for a user
 func (s *LDAPService) GetUserGroups(username string) ([]string, error) {
-	conn, err := s.connectToLDAP()
+	conn, err := s.ConnectToLDAP()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to LDAP: %w", err)
 	}
@@ -80,8 +80,8 @@ func (s *LDAPService) GetUserGroups(username string) ([]string, error) {
 	return s.getUserGroups(conn, username)
 }
 
-// connectToLDAP establishes connection to LDAP server
-func (s *LDAPService) connectToLDAP() (*ldap.Conn, error) {
+// ConnectToLDAP establishes connection to LDAP server (public method)
+func (s *LDAPService) ConnectToLDAP() (*ldap.Conn, error) {
 	ldapConfig := config.AppConfig.LDAP
 	
 	var conn *ldap.Conn

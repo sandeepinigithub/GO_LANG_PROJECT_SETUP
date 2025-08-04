@@ -24,6 +24,7 @@ type Config struct {
 	Logging  LoggingConfig
 	Redis    RedisConfig
 	LDAP     LDAPConfig
+	Mail     MailConfig
 }
 
 // DatabaseConfig holds database configuration
@@ -85,8 +86,19 @@ type LDAPConfig struct {
 	UseTLS       bool
 }
 
+// MailConfig holds mail service configuration
+type MailConfig struct {
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUsername string
+	SMTPPassword string
+	UseTLS       bool
+	FromAddress  string
+	ToAddress    string
+}
+
 var (
-	DB     *gorm.DB
+	DB        *gorm.DB
 	AppConfig *Config
 )
 
@@ -101,9 +113,9 @@ func LoadConfig() error {
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "3306"),
-			User:     getEnv("DB_USER", "devsmailgo"),
-			Password: getEnv("DB_PASSWORD", ""),
-			Name:     getEnv("DB_NAME", "devsmailgo"),
+			User:     getEnv("DB_USER", "root"),
+			Password: getEnv("DB_PASSWORD", "admin@123"),
+			Name:     getEnv("DB_NAME", "go_lang_project_setup"),
 		},
 		Server: ServerConfig{
 			Port:        getEnv("SERVER_PORT", "8080"),
@@ -132,15 +144,25 @@ func LoadConfig() error {
 			DB:       getEnvAsInt("REDIS_DB", 0),
 		},
 		LDAP: LDAPConfig{
-			Host:         getEnv("LDAP_HOST", "localhost"),
+			Host:         getEnv("LDAP_HOST", "172.105.49.219"),
 			Port:         getEnv("LDAP_PORT", "389"),
-			BaseDN:       getEnv("LDAP_BASE_DN", "dc=example,dc=com"),
-			BindDN:       getEnv("LDAP_BIND_DN", "cn=admin,dc=example,dc=com"),
-			BindPassword: getEnv("LDAP_BIND_PASSWORD", ""),
+			BaseDN:       getEnv("LDAP_BASE_DN", "dc=dev,dc=local"),
+			BindDN:       getEnv("LDAP_BIND_DN", "cn=admin,dc=dev,dc=local"),
+			BindPassword: getEnv("LDAP_BIND_PASSWORD", "admin@123"),
 			UserFilter:   getEnv("LDAP_USER_FILTER", "(uid=%s)"),
 			GroupFilter:  getEnv("LDAP_GROUP_FILTER", "(memberUid=%s)"),
 			UseSSL:       getEnvAsBool("LDAP_USE_SSL", false),
 			UseTLS:       getEnvAsBool("LDAP_USE_TLS", false),
+		},
+
+		Mail: MailConfig{
+			SMTPHost:     getEnv("SMTP_HOST", "172.105.49.219"),
+			SMTPPort:     getEnv("SMTP_PORT", "587"),
+			SMTPUsername: getEnv("SMTP_USERNAME", "sandeep@dev.local"),
+			SMTPPassword: getEnv("SMTP_PASSWORD", "admin@123"),
+			UseTLS:       getEnvAsBool("SMTP_USE_TLS", false),
+			FromAddress:  getEnv("MAIL_FROM_ADDRESS", "sandeep@dev.local"),
+			ToAddress:    getEnv("MAIL_TO_ADDRESS", "sandeep@dev.local"),
 		},
 	}
 
@@ -148,6 +170,14 @@ func LoadConfig() error {
 	AppConfig.Database.DSN = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
 		AppConfig.Database.User,
 		AppConfig.Database.Password,
+		AppConfig.Database.Host,
+		AppConfig.Database.Port,
+		AppConfig.Database.Name,
+	)
+
+	// Debug: Print DSN (remove password for security)
+	log.Printf("Database DSN (without password): %s:***@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
+		AppConfig.Database.User,
 		AppConfig.Database.Host,
 		AppConfig.Database.Port,
 		AppConfig.Database.Name,
@@ -197,10 +227,10 @@ func InitDB() error {
 	}
 
 	DB = db
-	log.Printf("Connected to MySQL database: %s@%s:%s/%s", 
-		AppConfig.Database.User, 
-		AppConfig.Database.Host, 
-		AppConfig.Database.Port, 
+	log.Printf("Connected to MySQL database: %s@%s:%s/%s",
+		AppConfig.Database.User,
+		AppConfig.Database.Host,
+		AppConfig.Database.Port,
 		AppConfig.Database.Name)
 
 	return nil
@@ -288,4 +318,3 @@ func ConnectDB() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 }
-

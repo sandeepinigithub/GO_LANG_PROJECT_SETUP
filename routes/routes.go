@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"github.com/gorilla/mux"
 	"devsMailGo/controller"
 	"devsMailGo/middleware"
+
+	"github.com/gorilla/mux"
 )
 
 func SetupRoutes() *mux.Router {
@@ -14,10 +15,16 @@ func SetupRoutes() *mux.Router {
 	publicRoutes.HandleFunc("/api/login", controller.Login).Methods("POST")
 	publicRoutes.HandleFunc("/api/health", controller.HealthCheck).Methods("GET")
 
+	// Test routes (for debugging and verification)
+	publicRoutes.HandleFunc("/api/test/ldap", controller.TestLDAPConnection).Methods("POST")
+	publicRoutes.HandleFunc("/api/test/ldap/simple", controller.TestLDAPConnectionSimple).Methods("GET")
+	publicRoutes.HandleFunc("/api/test/mail", controller.TestMailSending).Methods("POST")
+	publicRoutes.HandleFunc("/api/test/health", controller.TestSystemHealth).Methods("GET")
+
 	// Protected API routes (authentication required)
 	protectedAPI := r.PathPrefix("/api").Subrouter()
 	protectedAPI.Use(middleware.AuthMiddleware)
-	
+
 	// User management routes
 	protectedAPI.HandleFunc("/users", controller.GetUsers).Methods("GET")
 	protectedAPI.HandleFunc("/users/{id}", controller.GetUser).Methods("GET")
